@@ -3,8 +3,8 @@ const app = express();
 import cors from "cors";
 import { getDataBase } from "./db.js";
 import adminRouter from "./router/AdminRouter.js"
-
-
+import teacherRouter from "./router/TeacherRouter.js"
+import studentRouter from "./router/StudentRouter.js"
 const PORT = process.env.PORT || 3500;
 
 app.use(json());
@@ -13,6 +13,8 @@ app.use(urlencoded({ extended : true}));
 app.use(cors());
 
 app.use("/api/adminlogin",adminRouter);
+app.use("/api/create",teacherRouter);
+app.use("/api/student",studentRouter);
 
 const startServer = async () =>{
     try{

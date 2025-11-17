@@ -8,7 +8,7 @@ mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
     const newAdmin = new Admin({
       name: "Sibi",
-      adminId: "admin123",
+      loginId: "sibiraj",
       password: "12345",
     });
     await newAdmin.save();

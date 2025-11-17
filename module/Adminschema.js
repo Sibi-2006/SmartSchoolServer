@@ -7,7 +7,7 @@ const adminSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  adminId: {
+    loginId: {
     type: String,
     required: true,
     unique: true,

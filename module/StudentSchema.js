@@ -97,7 +97,7 @@ const StudentSchema = new mongoose.Schema(
     amountPaid: {
       type: Number,
       default: 0
-    },
+    },//
     balance: {
         type: Number,
         default: function () {

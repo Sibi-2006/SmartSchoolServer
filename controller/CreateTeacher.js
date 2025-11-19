@@ -1,105 +1,175 @@
 import Teacher from "../module/TeacherSchema.js";
 import bcrypt from "bcryptjs";
 
+// ===============================================
+// ADD NEW TEACHER
+// ===============================================
 export const AddTeacher = async (req, res) => {
+  try {
     const {
-        fullName,
-        email,
-        phone,
-        address,
-        gender,
-        dob,
-        department,
-        designation,
-        joiningDate,
-        qualification,
-        experience,
-        loginId,
-        password,
-        AssignedClass,
-        Salary
+      fullName,
+      email,
+      phone,
+      address,
+      gender,
+      dob,
+      department,
+      designation,
+      joiningDate,
+      qualification,
+      experience,
+      loginId,
+      password,
+      AssignedClass,
+      Salary
     } = req.body;
 
-    // -------- VALIDATION -------- //
-    const requiredFields = {
-        fullName,
-        email,
-        phone,
-        address,
-        gender,
-        dob,
-        department,
-        designation,
-        joiningDate,
-        qualification,
-        experience,
-        loginId,
-        password,
-        AssignedClass,
-        Salary
+    // ---------------------------
+    // Validate required fields
+    // ---------------------------
+    const required = {
+      fullName,
+      email,
+      phone,
+      address,
+      gender,
+      dob,
+      department,
+      designation,
+      joiningDate,
+      qualification,
+      experience,
+      loginId,
+      password,
+      AssignedClass,
+      Salary
     };
 
-    for (const key in requiredFields) {
-        if (!requiredFields[key]) {
-            return res.status(400).json({
-                message: `${key} is required`
-            });
-        }
+    for (const key in required) {
+      if (!required[key] || required[key].toString().trim() === "") {
+        return res.status(400).json({ message: `${key} is required` });
+      }
     }
 
+    // ---------------------------
+    // Check email exists
+    // ---------------------------
+    const emailExist = await Teacher.findOne({ email });
+    if (emailExist) {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+
+    // ---------------------------
+    // Check Login ID exists
+    // ---------------------------
+    const loginCheck = await Teacher.findOne({ loginId });
+    if (loginCheck) {
+      return res.status(409).json({ message: "Login ID already exists" });
+    }
+
+    // ---------------------------
+    // Generate Teacher ID (NO DUPLICATE)
+    // ---------------------------
+    const lastTeacher = await Teacher.findOne().sort({ teacherId: -1 });
+
+    let teacherId = "TCH-001";
+
+    if (lastTeacher) {
+      const lastNumber = parseInt(lastTeacher.teacherId.split("-")[1]);
+      const nextNumber = (lastNumber + 1).toString().padStart(3, "0");
+      teacherId = `TCH-${nextNumber}`;
+    }
+
+    // ---------------------------
+    // Hash password
+    // ---------------------------
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // ---------------------------
+    // Save data into DB
+    // ---------------------------
+    const newTeacher = new Teacher({
+      teacherId,
+      fullName,
+      email,
+      phone,
+      address,
+      gender,
+      dob,
+      department,
+      designation,
+      joiningDate,
+      qualification,
+      experience,
+      loginId,
+      password: hashedPassword,
+      AssignedClass,
+      Salary,
+    });
+
+    await newTeacher.save();
+
+    return res.status(201).json({
+      message: "Teacher added successfully",
+      teacher: newTeacher,
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+// =======================================================
+// DELETE ONE TEACHER
+// =======================================================
+export const deleteOneTeacher = async (req, res) => {
     try {
-        // -------- UNIQUE TEACHER ID -------- //
-        const count = await Teacher.countDocuments();
-        const teacherId = `TCH-2025-0${count + 1}`;
+        const { teacherId } = req.params;
 
-        // -------- EMAIL CHECK -------- //
-        const existingEmail = await Teacher.findOne({ email });
-        if (existingEmail) {
-            return res.status(409).json({ message: "Email already exists" });
-        }
+        if (!teacherId)
+            return res.status(400).json({ message: "Teacher ID is required" });
 
-        // -------- LOGIN ID CHECK -------- //
-        const existingLoginId = await Teacher.findOne({ loginId });
-        if (existingLoginId) {
-            return res.status(409).json({ message: "Login ID already exists" });
-        }
+        const result = await Teacher.findOneAndDelete({ teacherId });
 
-        // -------- FIX GENDER CASE (OPTIONAL) -------- //
-        const fixedGender = gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
+        if (!result)
+            return res.status(404).json({ message: "Teacher not found" });
 
-        // -------- HASH PASSWORD -------- //
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // -------- CREATE TEACHER OBJ ---- //
-        const newTeacher = {
-            fullName,
-            email,
-            phone,
-            address,
-            gender: fixedGender,  
-            dob,
-            teacherId,
-            department,
-            designation,
-            joiningDate,
-            qualification,
-            experience,
-            loginId,
-            password: hashedPassword,  
-            AssignedClass,             
-            Salary                     
-        };
-
-        // -------- SAVE TO DATABASE -------- //
-        await Teacher.create(newTeacher);
-
-        return res.status(201).json({
-            message: "Teacher added successfully",
-            teacherId
+        return res.status(200).json({
+            message: "Teacher deleted successfully",
+            deletedTeacher: result
         });
 
     } catch (err) {
         console.log(err);
-        return res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+
+// =======================================================
+// GET ONE TEACHER BY TEACHER ID
+// =======================================================
+export const oneTeacher = async (req, res) => {
+    try {
+        const { teacherId } = req.params;
+
+        if (!teacherId)
+            return res.status(400).json({ message: "Teacher ID is required" });
+
+        const teacher = await Teacher.findOne({ teacherId }) .select("-password -loginId -__v");;
+
+        if (!teacher)
+            return res.status(404).json({ message: "Teacher not found" });
+
+        return res.status(200).json({
+            message: "Teacher fetched successfully",
+            teacher,
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
     }
 };

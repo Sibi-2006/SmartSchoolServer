@@ -173,3 +173,96 @@ export const oneTeacher = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+export const editOneTeacher = async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+
+    const {
+      fullName,
+      email,
+      phone,
+      address,
+      gender,
+      dob,
+      department,
+      designation,
+      joiningDate,
+      qualification,
+      experience,
+      AssignedClass,
+      Salary
+    } = req.body;
+
+    if (!teacherId) {
+      return res.status(400).json({ message: "Teacher ID is required" });
+    }
+
+    // Required field validation
+    const required = {
+      fullName,
+      email,
+      phone,
+      address,
+      gender,
+      dob,
+      department,
+      designation,
+      joiningDate,
+      qualification,
+      experience,
+      AssignedClass,
+      Salary
+    };
+
+    for (const key in required) {
+      if (required[key] === undefined || required[key].toString().trim() === "") {
+        return res.status(400).json({ message: `${key} is required` });
+      }
+    }
+
+    // Check if email already exists in Teacher collection
+    const emailExist = await Teacher.findOne({
+      email: email,
+      teacherId: { $ne: teacherId },   // avoid matching same teacher
+    });
+
+    if (emailExist) {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+
+    // Update teacher
+    const upDateTeacher = await Teacher.findOneAndUpdate(
+      { teacherId },
+      {
+        fullName,
+        email,
+        phone,
+        address,
+        gender,
+        dob,
+        department,
+        designation,
+        joiningDate,
+        qualification,
+        experience,
+        AssignedClass,
+        Salary
+      },
+      { new: true }
+    );
+
+    if (!upDateTeacher) {
+      return res.status(404).json({ message: "Teacher not found" });
+    }
+
+    return res.status(200).json({
+      message: "Successfully updated teacher",
+      teacher: upDateTeacher
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

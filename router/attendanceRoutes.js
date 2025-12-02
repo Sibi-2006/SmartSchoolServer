@@ -1,34 +1,33 @@
 import express from "express";
 import Attendance from "../module/AttendanceSchema.js";
 import { teacherProtect } from "../middleware/authMiddleware.js";
-
+import { getOneStudentAttendance } from "../controller/AttendanceController.js";
+import { studentProtect } from "../middleware/authMiddleware.js"
 const router = express.Router();
 
 // Teacher marks attendance
+// Teacher marks attendance
 router.post("/mark", teacherProtect, async (req, res) => {
     try {
-        const { date, standard, section, students, subject} = req.body;
+        const { date, standard, section, students, subject } = req.body;
 
-
-        const required ={
-            date, standard, section, students, subject
+        // Validate
+        if (!date || !standard || !section || !students || !subject) {
+            return res.status(400).json({ message: "All fields are required" });
         }
 
-        for (const key in required) {
-            if (!required[key] || required[key].toString().trim() === "") {
-                return res.status(400).json({ message: `${key} is required` });
-            }
-            }
-        // Prevent duplicate attendance
+        // Prevent duplicate for same teacher & subject
         const exists = await Attendance.findOne({
             date,
             standard,
             section,
+            subject,
+            markedBy: req.teacher._id
         });
 
         if (exists) {
             return res.status(400).json({
-                message: "Attendance already marked for this class today",
+                message: "You have already marked attendance for this class/subject today",
             });
         }
 
@@ -37,8 +36,8 @@ router.post("/mark", teacherProtect, async (req, res) => {
             date,
             standard,
             section,
-            subject: subject || null,
-            markedBy: req.teacher._id, 
+            subject,
+            markedBy: req.teacher._id,
             students,
         });
 
@@ -52,5 +51,9 @@ router.post("/mark", teacherProtect, async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
+
+
+
+router.get("/one-student/:section/:standard/:studentId",studentProtect,getOneStudentAttendance);
 
 export default router;

@@ -67,3 +67,40 @@ export const TotalBoysandGirls = async (req, res) => {
     return res.status(500).json({ message: "Server Error" });
   }
 };
+
+
+// edit teacher from teacher
+export const editeTeacher = async (req, res) => {
+  try {
+    const id = req.params.id;  
+    if (!id) return res.status(404).json({ message: "Id is required" });
+
+    const { fullName, email, phone, dob, gender, address } = req.body;
+
+    const required = { fullName, email, phone, dob, gender, address };
+
+    for (const key in required) {
+      if (!required[key] || required[key].toString().trim() === "") {
+        return res.status(400).json({ message: `${key} is required` });
+      }
+    }
+
+    const teacher = await Teacher.findByIdAndUpdate(
+      id,                                 // FIXED — pass only id
+      { fullName, email, phone, dob, gender, address },
+      { new: true }
+    );
+
+    if (!teacher)
+      return res.status(404).json({ message: "Cannot find teacher" });
+
+    return res.status(200).json({
+      message: "Teacher updated",
+      updatedTeacher: teacher,
+    });
+
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};

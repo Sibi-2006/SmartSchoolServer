@@ -19,6 +19,7 @@ app.use("/api/create",teacherRouter);
 app.use("/api/student",studentRouter);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/add-mark",markRouter);
+app.use("/api/attendance",attendanceRoutes);
 const startServer = async () =>{
     try{
         await getDataBase();

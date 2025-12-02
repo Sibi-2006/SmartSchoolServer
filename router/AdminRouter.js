@@ -9,7 +9,7 @@ import bcrypt from "bcryptjs";
 const router = express.Router();
 
 router.get("/dashboard", protect, (req, res) => {
-  res.status(200).json({ message: `Welcome ${req.admin.name}`, admin: req.admin });
+  res.status(200).json({ message: `Welcome ${req.admin.fullName}`, admin: req.admin });
 });
 
 router.post("/login", async (req, res) => {

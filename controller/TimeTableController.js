@@ -105,3 +105,62 @@ export const getAllStandardSection = async (req, res) => {
     return res.status(500).json({ message: "Server Error" });
   }
 };
+
+//delete one time-table by id
+export const deleteTimeTable = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "ID is required" });
+    }
+
+    const deleted = await TimeTable.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Time-table not found" });
+    }
+
+    return res.status(200).json({ message: "Time-table deleted successfully" });
+
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
+//edit one time-table
+export const editTimeTable = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: "ID is required" });
+    }
+
+    const updatedData = req.body;
+
+    if (!updatedData || Object.keys(updatedData).length === 0) {
+      return res.status(400).json({ message: "No data provided for update" });
+    }
+
+    const updated = await TimeTable.findByIdAndUpdate(
+      id,
+      updatedData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Time-table not found" });
+    }
+
+    return res.status(200).json({
+      message: "Time-table updated successfully",
+      updated
+    });
+
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};

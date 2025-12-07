@@ -6,6 +6,8 @@ import jwt from "jsonwebtoken";
 import { protect } from "../middleware/authMiddleware.js";
 import { ClassStats, deleteOneStudent, getAllDetails, getOneStudent, getStudentsByClass } from "../controller/allDetails.js";
 import bcrypt from "bcryptjs";
+import { checkMoney } from "../controller/moneyController.js";
+import { createParent } from "../controller/parentController.js";
 const router = express.Router();
 
 router.get("/dashboard", protect, (req, res) => {
@@ -117,7 +119,8 @@ if (lastAdmin && lastAdmin.adminId) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
-
+//create parent
+router.post("/create/parent",protect,createParent);
 router.get("/get/allDetails/from/:category",protect,getAllDetails);
 //to get all class
 router.get("/class-stats",protect, ClassStats);
@@ -127,6 +130,6 @@ router.get("/class/findOne/student/:studentId",protect,getOneStudent);
 router.get("/class/:standard/:section",protect,getStudentsByClass);
 //to delete one student
 router.delete("/delete/student/:studentId",protect,deleteOneStudent);
-
+router.get("/amount/details",protect,checkMoney);
 
 export default router;

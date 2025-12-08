@@ -8,6 +8,7 @@ import studentRouter from "./router/StudentRouter.js"
 import attendanceRoutes from "./router/attendanceRoutes.js"
 import markRouter from "./router/addMarksRouter.js";
 import TimeTableRouter from "./router/TimeTableRouter.js";
+import parentRouter from "./router/parentRouter.js";
 const PORT = process.env.PORT || 3500;
 
 app.use(json());
@@ -22,6 +23,7 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/add-mark",markRouter);
 app.use("/api/attendance",attendanceRoutes);
 app.use("/api/timetable",TimeTableRouter);
+app.use("/api/parent",parentRouter);
 
 const startServer = async () =>{
     try{

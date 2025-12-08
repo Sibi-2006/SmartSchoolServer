@@ -39,7 +39,7 @@ export const studentLogin = async (req, res) => {
 };
 
 //get one student 
-export const getOneStudent = async (req,res)=>{
+export const getOneStudent_ = async (req,res)=>{
   try{
     const { id } = req.params;
     if(!id) return res.status(404).json({message:"id is required"});

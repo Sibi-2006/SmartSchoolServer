@@ -1,6 +1,7 @@
 import Parent from "../module/ParentSchema.js";
 import Student from "../module/StudentSchema.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export const createParent = async (req, res) => {
   try {
@@ -74,6 +75,40 @@ export const createParent = async (req, res) => {
       message: "parent added successfully",
       parent: parentData,
     });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// login for parent
+export const loginParent = async (req, res) => {
+  try {
+    const { loginId, password } = req.body;
+
+    if (!loginId || !password)
+      return res.status(400).json({ message: "login-id and password are required" });
+
+    const parent = await Parent.findOne({ loginId });
+    if (!parent)
+      return res.status(400).json({ message: "Invalid login-id" });
+
+    const isMatch = await bcrypt.compare(password, parent.password);
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid password" });
+
+    const token = jwt.sign(
+      { id: parent._id, loginId: parent.loginId },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      parent: { fullName: parent.fullName, loginId: parent.loginId },
+    });
+
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error" });

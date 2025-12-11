@@ -68,10 +68,10 @@ router.get("/getMax",protect,async(req,res)=>{
 });
 router.post("/addnew/admin", protect, async (req, res) => {
   try {
-    const { userName, email, password, loginId } = req.body;
+    const { fullName, email, password, loginId , phone } = req.body;
 
     // Validation
-    const isValid = { userName, email, password, loginId };
+    const isValid = { fullName, email, password, loginId , phone };
 
     for (const key in isValid) {
       if (!isValid[key] || isValid[key].toString().trim() === "") {
@@ -103,8 +103,9 @@ if (lastAdmin && lastAdmin.adminId) {
 
     // Create Admin
     const newAdmin = await Admin.create({
-      userName,
+      fullName,
       email,
+      phone,
       password: hashedPassword,
       loginId,
       adminId,

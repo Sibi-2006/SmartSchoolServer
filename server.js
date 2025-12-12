@@ -26,6 +26,9 @@ app.use("/api/attendance",attendanceRoutes);
 app.use("/api/timetable",TimeTableRouter);
 app.use("/api/parent",parentRouter);
 app.use("/api/forget/password",forgetPassword);
+app.get("/", (req, res) => {
+  res.send("Welcome to Smart School Server!");
+});
 
 const startServer = async () =>{
     try{

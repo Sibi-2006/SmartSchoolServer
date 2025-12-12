@@ -26,37 +26,3 @@ export const forget_password = async(req,res)=>{
     return res.status(500).json({ message: "Server error" ,isSucces:false});
   }
 }
-export const sentOTP = async (req, res) => {
-  try {
-    const { phone } = req.body;
-
-    if (!phone)
-      return res.status(404).json({ message: "phone is required", isSucces: false });
-
-    // Generate OTP
-    let otp = "";
-    for (let i = 0; i < 4; i++) {
-      otp += Math.floor(Math.random() * 10);
-    }
-
-    await Otp.create({
-      phone,
-      otp,
-      expiresAt: Date.now() + 5 * 60 * 1000
-    });
-
-    // Send SMS here
-    // await sendSMS(phone, otp);
-
-    return res.status(200).json({
-      message: "OTP generated",
-      otp, 
-      isSucces: true
-    });
-
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: "server error", isSucces: false });
-  }
-};
-

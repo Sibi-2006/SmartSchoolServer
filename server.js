@@ -27,7 +27,12 @@ app.use("/api/timetable",TimeTableRouter);
 app.use("/api/parent",parentRouter);
 app.use("/api/forget/password",forgetPassword);
 app.get("/", (req, res) => {
-  res.send("Welcome to Smart School Server!");
+  try{
+    return res.status(200).json({message:"server connected" , isSucces:true});
+  }catch(err){
+    console.log(err);
+    return res.status(404).json({message:"server error" , isSucces:false});
+  }
 });
 
 const startServer = async () =>{

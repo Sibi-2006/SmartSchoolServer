@@ -1,7 +1,7 @@
 import express from "express";
 import Attendance from "../module/AttendanceSchema.js";
-import { teacherProtect } from "../middleware/authMiddleware.js";
-import { getOneStudentAttendance } from "../controller/AttendanceController.js";
+import { parentProtect, protect, teacherProtect } from "../middleware/authMiddleware.js";
+import { getOneStudentAttendance, getOneStudentAttendancePercentage } from "../controller/AttendanceController.js";
 import { studentProtect } from "../middleware/authMiddleware.js"
 const router = express.Router();
 
@@ -52,8 +52,18 @@ router.post("/mark", teacherProtect, async (req, res) => {
     }
 });
 
+// /attendance/one-student/${section}/${standard}/${id}/${from}`
+
+router.get("/one-student/:section/:standard/:studentId/student",studentProtect,getOneStudentAttendance);
+router.get("/one-student/:section/:standard/:studentId/teacher",teacherProtect,getOneStudentAttendance);
+router.get("/one-student/:section/:standard/:studentId/parent",parentProtect,getOneStudentAttendance);
+router.get("/one-student/:section/:standard/:studentId/admin",protect,getOneStudentAttendance);
+
+router.get("/one-student/percentage/:section/:standard/:studentId/teacher",teacherProtect,getOneStudentAttendancePercentage);
+router.get("/one-student/percentage/:section/:standard/:studentId/admin",protect,getOneStudentAttendancePercentage);
 
 
-router.get("/one-student/:section/:standard/:studentId",studentProtect,getOneStudentAttendance);
+
+
 
 export default router;

@@ -133,4 +133,5 @@ router.get("/class/:standard/:section",protect,getStudentsByClass);
 router.delete("/delete/student/:studentId",protect,deleteOneStudent);
 router.get("/amount/details",protect,checkMoney);
 
+
 export default router;

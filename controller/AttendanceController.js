@@ -36,3 +36,60 @@ export const getOneStudentAttendance = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+
+// get one student attendance %
+export const getOneStudentAttendancePercentage = async (req, res) => {
+  try {
+    const { section, standard, studentId } = req.params;
+
+    if (!section || !standard || !studentId) {
+      return res.status(400).json({
+        message: "section, standard, and student-id are required",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      return res.status(400).json({ message: "Invalid student ID" });
+    }
+
+    // Find attendance records for class & section
+    const attendanceRecords = await Attendance.find({
+      section,
+      standard,
+      "students.studentId": studentId,
+    });
+
+    let totalDays = 0;
+    let presentDays = 0;
+
+    attendanceRecords.forEach(record => {
+      const student = record.students.find(
+        s => s.studentId.toString() === studentId
+      );
+
+      if (student) {
+        totalDays++;
+        if (student.status === "present") {
+          presentDays++;
+        }
+      }
+    });
+
+    const percentage =
+      totalDays === 0 ? 0 : ((presentDays / totalDays) * 100).toFixed(2);
+
+    return res.status(200).json({
+      studentId,
+      standard,
+      section,
+      totalDays,
+      presentDays,
+      attendancePercentage: `${percentage}%`,
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};

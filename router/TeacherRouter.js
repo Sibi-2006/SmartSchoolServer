@@ -3,7 +3,7 @@ import { AddTeacher, deleteOneTeacher, editOneTeacher, oneTeacher } from "../con
 import { protect , teacherProtect } from "../middleware/authMiddleware.js";
 import { teacherLogin } from "../controller/LoginController.js";
 import { editeTeacher, getOneTeacherClass, TotalBoysandGirls } from "../controller/TeacherController.js";
-import { getStudentsByClass } from "../controller/allDetails.js";
+import { ClassStats, getStudentsByClass } from "../controller/allDetails.js";
 
 const router = express.Router();
 // ---------- TEACHER DASHBOARD (Protected) ----------
@@ -26,5 +26,8 @@ router.get("/teacher/total-gender/:standard/:section", teacherProtect, TotalBoys
 router.get("/getOneTeacher/by-Id/:teacherId",teacherProtect, oneTeacher);
 router.get("/class/:standard/:section",teacherProtect,getStudentsByClass);
 router.patch("/update/teacher/:id",teacherProtect,editeTeacher);
+
+
+router.get("/class-stats",teacherProtect,ClassStats);
 
 export default router;

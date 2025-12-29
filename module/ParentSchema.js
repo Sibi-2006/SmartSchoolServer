@@ -25,6 +25,10 @@ const ParentSchema = mongoose.Schema({
         type: String,
         required: [true, "Password is required"]
         },
+        secondPassword: {
+        type: String,
+        required: [true, "Password is required"]
+        },
         studentId:{
             type: String,
             required: true,

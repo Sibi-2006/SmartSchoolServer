@@ -10,6 +10,8 @@ import markRouter from "./router/addMarksRouter.js";
 import TimeTableRouter from "./router/TimeTableRouter.js";
 import parentRouter from "./router/parentRouter.js";
 import forgetPassword from "./router/forgetPassword.js"
+import verifyMarksRouter from "./router/verifyMarksRouter.js";
+import certificateRouter  from "./router/certificateRouter.js"
 const PORT = process.env.PORT || 3500;
 
 app.use(json());
@@ -26,6 +28,8 @@ app.use("/api/attendance",attendanceRoutes);
 app.use("/api/timetable",TimeTableRouter);
 app.use("/api/parent",parentRouter);
 app.use("/api/forget/password",forgetPassword);
+app.use("/api/verify",verifyMarksRouter);
+app.use("/api/certificate",certificateRouter)
 app.get("/", (req, res) => {
   try{
     return res.status(200).json({message:"server connected" , isSucces:true});

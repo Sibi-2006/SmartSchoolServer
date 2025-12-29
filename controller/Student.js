@@ -44,7 +44,7 @@ export const getOneStudent_ = async (req,res)=>{
     const { id } = req.params;
     if(!id) return res.status(404).json({message:"id is required"});
 
-    const student = await Student.findById(id);
+    const student = await Student.findById(id).select("-password -loginId -__v");;
     if(!student) res.status(400).json({message:"student not fouded"});
 
     return res.status(200).json({message:"student found successful" , student:student});

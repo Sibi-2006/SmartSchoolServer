@@ -1,6 +1,7 @@
 import Parent from "../module/ParentSchema.js";
 import Student from "../module/StudentSchema.js";
 import bcrypt from "bcryptjs";
+import Verify from "../module/VerifySchema.js"
 import jwt from "jsonwebtoken";
 
 export const createParent = async (req, res) => {
@@ -11,7 +12,8 @@ export const createParent = async (req, res) => {
       phone,
       studentId,
       loginId,
-      password
+      password,
+      secondPassword
     } = req.body;
 
     // required check
@@ -22,6 +24,7 @@ export const createParent = async (req, res) => {
       studentId,
       loginId,
       password,
+      secondPassword,
     };
 
     for (const key in required) {
@@ -54,7 +57,7 @@ export const createParent = async (req, res) => {
 
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    const secondhashedPassword = await bcrypt.hash(secondPassword,10);
     // create parent
     const newParent = new Parent({
       fullName,
@@ -63,6 +66,7 @@ export const createParent = async (req, res) => {
       studentId,
       loginId,
       password: hashedPassword,
+      secondPassword:secondhashedPassword
     });
 
     await newParent.save();
@@ -109,6 +113,101 @@ export const loginParent = async (req, res) => {
       parent: { fullName: parent.fullName, loginId: parent.loginId },
     });
 
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+export const verifyMarks = async (req, res) => {
+  try {
+    const {
+      studentId,
+      student_Id,
+      fullName,
+      standard,
+      section,
+      examType,
+      result,
+      secondPassword,
+    } = req.body;
+
+    /* ================= VALIDATION ================= */
+    const required = {
+      studentId,
+      student_Id,
+      fullName,
+      standard,
+      section,
+      examType,
+      result,
+      secondPassword,
+    };
+
+    for (const key in required) {
+      if (!required[key] || required[key].toString().trim() === "") {
+        return res.status(400).json({ message: `${key} is required` });
+      }
+    }
+    const isExist = await Verify.findOne({ student_Id, examType });
+
+    if (isExist) {
+      return res
+        .status(409)
+        .json({ message: "Marks already verified" });
+    }
+
+
+    /* ================= AUTH PARENT ================= */
+    const parent = await Parent.findOne({ studentId });
+    if (!parent) {
+      return res.status(404).json({ message: "Parent not found" });
+    }
+
+    if (parent.studentId !== studentId) {
+      return res.status(403).json({ message: "Unauthorized student access" });
+    }
+
+    /* ================= PASSWORD CHECK ================= */
+    const isMatch = await bcrypt.compare(
+      secondPassword,
+      parent.secondPassword
+    );
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid second password" });
+    }
+
+    /* ================= DUPLICATE CHECK ================= */
+    const alreadyVerified = await Verify.findOne({
+      student_Id,
+      examType,
+    });
+
+    if (alreadyVerified) {
+      return res.status(409).json({
+        message: "Marks already verified for this exam",
+      });
+    }
+
+    /* ================= SAVE ================= */
+    const newVerify = new Verify({
+      student_Id,
+      fullName,
+      standard,
+      section,
+      examType,
+      result,
+    });
+
+    await newVerify.save();
+
+    return res.status(200).json({
+      message: "Marks verified successfully",
+      verify: newVerify,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error" });
